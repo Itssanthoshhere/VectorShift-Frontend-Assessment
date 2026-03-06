@@ -26,6 +26,7 @@ export const SubmitButton = () => {
       );
     } catch (error) {
       console.error("Error submitting pipeline:", error);
+      alert("Failed to submit pipeline. Please try again.");
     }
   };
 
