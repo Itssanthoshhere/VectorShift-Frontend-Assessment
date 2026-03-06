@@ -18,8 +18,7 @@ export const TextNode = ({ id, data }) => {
 
   // Update variables when text changes
   useEffect(() => {
-    const vars = extractVariables(text);
-    setVariables(vars);
+    setVariables(extractVariables(text));
   }, [text]);
 
   // Auto resize textarea
@@ -36,10 +35,11 @@ export const TextNode = ({ id, data }) => {
       {/* Dynamic variable handles */}
       {variables.map((variable, index) => (
         <Handle
-          key={index}
+          key={variable}
           type="target"
           position={Position.Left}
           id={variable}
+          style={{ top: 40 + index * 20 }}
         />
       ))}
 
