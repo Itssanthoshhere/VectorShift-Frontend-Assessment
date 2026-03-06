@@ -1,35 +1,64 @@
 // textNode.js
 
-import { useState } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useState, useEffect, useRef } from "react";
+import { Handle, Position } from "reactflow";
+import { BaseNode } from "./BaseNode";
 
 export const TextNode = ({ id, data }) => {
-  const [currText, setCurrText] = useState(data?.text || '{{input}}');
+  const [text, setText] = useState("");
+  const [variables, setVariables] = useState([]);
+  const textareaRef = useRef(null);
 
-  const handleTextChange = (e) => {
-    setCurrText(e.target.value);
+  // Extract variables like {{variable}}
+  const extractVariables = (text) => {
+    const regex = /{{\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*}}/g;
+    const matches = [...text.matchAll(regex)];
+    return [...new Set(matches.map((m) => m[1]))];
   };
 
+  // Update variables when text changes
+  useEffect(() => {
+    const vars = extractVariables(text);
+    setVariables(vars);
+  }, [text]);
+
+  // Auto resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [text]);
+
   return (
-    <div style={{width: 200, height: 80, border: '1px solid black'}}>
-      <div>
-        <span>Text</span>
-      </div>
-      <div>
-        <label>
-          Text:
-          <input 
-            type="text" 
-            value={currText} 
-            onChange={handleTextChange} 
-          />
-        </label>
-      </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        id={`${id}-output`}
+    <BaseNode title="Text" outputs={["output"]}>
+      {/* Dynamic variable handles */}
+      {variables.map((variable, index) => (
+        <Handle
+          key={index}
+          type="target"
+          position={Position.Left}
+          id={variable}
+        />
+      ))}
+
+      <textarea
+        ref={textareaRef}
+        value={text}
+        placeholder="Enter text..."
+        onChange={(e) => setText(e.target.value)}
+        style={{
+          width: "100%",
+          minHeight: "40px",
+          resize: "none",
+          borderRadius: "5px",
+          border: "1px solid #374151",
+          padding: "6px",
+          background: "#111827",
+          color: "white",
+        }}
       />
-    </div>
+    </BaseNode>
   );
-}
+};
